@@ -4,7 +4,7 @@ import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 
-const { default: admin } = await import("./firebaseAdmin.js");
+import admin from "./firebaseAdmin.js";
 
 const app = express();
 const port = process.env.PORT || 5000;
