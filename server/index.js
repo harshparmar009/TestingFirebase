@@ -6,30 +6,19 @@ import cors from "cors";
 import admin from "./firebaseAdmin.js";
 
 const app = express();
-
-app.use(express.json());
-
-const server = http.createServer(app);  
-
 const port = process.env.PORT || 5000;
-
-// Module-level state
-const tokenStore = new Map();       // token -> { registeredAt, browser }
-const tokenFailures = new Map();    // token -> failureCount
-const MAX_FAILURES = 3;
 
 const allowedOrigins = [
   "http://localhost:5173",
   process.env.CLIENT_URL,
 ].filter(Boolean);
 
-// ✅ Allow all Vercel preview deployments for your project
 const corsOptions = {
   origin: (origin, callback) => {
     const isAllowed =
-      !origin || // allow non-browser requests (Postman etc)
+      !origin ||
       allowedOrigins.includes(origin) ||
-      /https:\/\/testing-firebase-.*\.vercel\.app$/.test(origin); // ✅ matches all preview URLs
+      /https:\/\/testing-firebase-.*\.vercel\.app$/.test(origin);
 
     if (isAllowed) {
       callback(null, true);
@@ -39,40 +28,46 @@ const corsOptions = {
     }
   },
   methods: ["GET", "POST"],
+  credentials: true, // ✅ add this
 };
 
+// ✅ cors MUST be first, before everything else
 app.use(cors(corsOptions));
+app.use(express.json()); // ✅ after cors
+
+const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: corsOptions,
+  transports: ["polling", "websocket"], // ✅ explicitly allow both
 });
 
+const tokenStore = new Map();
+const tokenFailures = new Map();
+const MAX_FAILURES = 3;
 let users = new Map();
 
 app.post("/api/register-token", (req, res) => {
   const { token, browser } = req.body;
   if (!token) return res.status(400).json({ error: "Token required" });
 
- const isNew = !tokenStore.has(token);
-
+  const isNew = !tokenStore.has(token);
   tokenStore.set(token, { registeredAt: Date.now(), browser });
-  tokenFailures.delete(token); // reset failures on fresh registration
+  tokenFailures.delete(token);
 
-   console.log(`${isNew ? " New" : " Re-registered"} token. Total: ${tokenStore.size}`);
-  console.log(`Token registered. Total tokens: ${tokenStore.size}`);
+  console.log(`${isNew ? "🆕 New" : "♻️ Re-registered"} token. Total: ${tokenStore.size}`);
   res.json({ success: true });
 });
 
-//remove registered token
-// app.post("/api/remove-token", (req, res) => {
-//   const { token } = req.body;
-//   if (token) {
-//     tokenStore.delete(token);
-//     tokenFailures.delete(token);
-//     console.log(`Token removed. Total: ${tokenStore.size}`);
-//   }
-//   res.json({ success: true });
-// });
+app.post("/api/remove-token", (req, res) => {
+  const { token } = req.body;
+  if (token) {
+    tokenStore.delete(token);
+    tokenFailures.delete(token);
+    console.log(`🗑️ Token removed. Total: ${tokenStore.size}`);
+  }
+  res.json({ success: true });
+});
 
 app.post("/api/send-message", async (req, res) => {
   const { username, message, senderToken } = req.body;
@@ -81,10 +76,8 @@ app.post("/api/send-message", async (req, res) => {
     return res.status(400).json({ error: "message and username required" });
   }
 
-  //  Fix: use .keys() to get token strings from Map
   const tokens = [...tokenStore.keys()].filter(t => t !== senderToken);
-
-  console.log(` Sending to ${tokens.length} token(s), sender filtered out: ${!!senderToken}`);
+  console.log(`📤 Sending to ${tokens.length} token(s)`);
 
   if (tokens.length === 0) {
     return res.json({ success: true, info: "No other users to notify" });
@@ -94,45 +87,42 @@ app.post("/api/send-message", async (req, res) => {
     const fcmMessage = {
       webpush: {
         notification: {
-          title: ` ${username}`,
+          title: `${username}`,
           body: message,
           icon: "/logo192.png",
           badge: "/logo192.png",
           requireInteraction: false,
           tag: "chat-message",
-          renotify: false, 
+          renotify: false,
         },
       },
       tokens,
     };
 
     const response = await admin.messaging().sendEachForMulticast(fcmMessage);
-    console.log(` FCM: ${response.successCount} sent, ${response.failureCount} failed`);
+    console.log(`✅ FCM: ${response.successCount} sent, ${response.failureCount} failed`);
 
     response.responses.forEach((resp, idx) => {
       const token = tokens[idx];
-
       if (!resp.success) {
         const code = resp.error?.code;
-        console.log(` FCM failure for token[${idx}]: ${code} — ${resp.error?.message}`);
-
+        console.log(`❌ FCM failure for token[${idx}]: ${code}`);
         if (
           code === "messaging/invalid-registration-token" ||
           code === "messaging/registration-token-not-registered"
         ) {
           const failures = (tokenFailures.get(token) || 0) + 1;
-
           if (failures >= MAX_FAILURES) {
             tokenStore.delete(token);
             tokenFailures.delete(token);
-            console.log(` Removed token after ${MAX_FAILURES} failures`);
+            console.log(`🗑️ Removed token after ${MAX_FAILURES} failures`);
           } else {
             tokenFailures.set(token, failures);
-            console.log(` Token failure ${failures}/${MAX_FAILURES}`);
+            console.log(`⚠️ Token failure ${failures}/${MAX_FAILURES}`);
           }
         }
       } else {
-        tokenFailures.delete(token); // reset on success
+        tokenFailures.delete(token);
       }
     });
 
@@ -165,6 +155,6 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(port || 5000, () => {
-  console.log(`Server running on port ${port || 5000}`);
+server.listen(port, () => {
+  console.log(`✅ Server running on port ${port}`);
 });
