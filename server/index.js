@@ -19,9 +19,15 @@ const tokenStore = new Map();       // token -> { registeredAt, browser }
 const tokenFailures = new Map();    // token -> failureCount
 const MAX_FAILURES = 3;
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://testing-firebase-ojqzrsrre-hardins-projects-4071acd0.vercel.app",
+  process.env.CLIENT_URL, // ✅ add this in Koyeb env variables too
+].filter(Boolean);
+
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL,
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
   },
 });
