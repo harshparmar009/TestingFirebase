@@ -11,37 +11,29 @@ const port = process.env.PORT || 5000;
 // ✅ Simple and clear
 const allowedOrigins = [
   "http://localhost:5173",
-  "testing-firebase-eight.vercel.app", // ✅ your stable Vercel URL
-  process.env.CLIENT_URL,
-].filter(Boolean);
+  "https://testing-firebase-pi.vercel.app",
+]
 
 console.log("✅ Allowed origins:", allowedOrigins);
 
-const corsOptions = {
-  origin: (origin, callback) => {
-    // ✅ Log every request so you can see what's being blocked
-    console.log("📥 Request from origin:", origin);
-
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log("❌ Blocked:", origin);
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  methods: ["GET", "POST"],
-  credentials: true,
-};
 
 // ✅ cors MUST be first, before everything else
-app.use(cors(corsOptions));
+app.use(cors({
+  origin: allowedOrigins,
+  methods: ["GET", "POST"],
+  credentials: true,
+}));
+
 app.use(express.json()); // ✅ after cors
 
 const server = http.createServer(app);
 
 const io = new Server(server, {
-  cors: corsOptions,
-  transports: ["polling", "websocket"], // ✅ explicitly allow both
+  cors: {
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
 });
 
 const tokenStore = new Map();
