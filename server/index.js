@@ -18,7 +18,7 @@ const corsOptions = {
     const isAllowed =
       !origin ||
       allowedOrigins.includes(origin) ||
-      /https:\/\/testing-firebase-.*\.vercel\.app$/.test(origin);
+      /https:\/\/.*\.vercel\.app$/.test(origin); // ✅ allows any vercel.app domain
 
     if (isAllowed) {
       callback(null, true);
@@ -28,8 +28,9 @@ const corsOptions = {
     }
   },
   methods: ["GET", "POST"],
-  credentials: true, // ✅ add this
+  credentials: true,
 };
+
 
 // ✅ cors MUST be first, before everything else
 app.use(cors(corsOptions));
