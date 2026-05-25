@@ -7,7 +7,6 @@ import admin from "./firebaseAdmin.js";
 
 const app = express();
 
-app.use(cors());
 app.use(express.json());
 
 const server = http.createServer(app);  
@@ -21,15 +20,31 @@ const MAX_FAILURES = 3;
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://testing-firebase-ojqzrsrre-hardins-projects-4071acd0.vercel.app",
-  process.env.CLIENT_URL, // ✅ add this in Koyeb env variables too
+  process.env.CLIENT_URL,
 ].filter(Boolean);
 
-const io = new Server(server, {
-  cors: {
-    origin: allowedOrigins,
-    methods: ["GET", "POST"],
+// ✅ Allow all Vercel preview deployments for your project
+const corsOptions = {
+  origin: (origin, callback) => {
+    const isAllowed =
+      !origin || // allow non-browser requests (Postman etc)
+      allowedOrigins.includes(origin) ||
+      /https:\/\/testing-firebase-.*\.vercel\.app$/.test(origin); // ✅ matches all preview URLs
+
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      console.log("❌ Blocked by CORS:", origin);
+      callback(new Error("Not allowed by CORS"));
+    }
   },
+  methods: ["GET", "POST"],
+};
+
+app.use(cors(corsOptions));
+
+const io = new Server(server, {
+  cors: corsOptions,
 });
 
 let users = new Map();
