@@ -10,7 +10,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const server = http.createServer(app);
+const server = http.createServer(app);  
+
+const port = process.env.PORT || 5000;
 
 // Module-level state
 const tokenStore = new Map();       // token -> { registeredAt, browser }
@@ -19,7 +21,7 @@ const MAX_FAILURES = 3;
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: process.env.NODE_ENV === "production" ? process.env.CLIENT_URL : "http://localhost:5173",
     methods: ["GET", "POST"],
   },
 });
@@ -142,6 +144,6 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(5000, () => {
-  console.log("Server running on port 5000");
+server.listen(port || 5000, () => {
+  console.log(`Server running on port ${port || 5000}`);
 });

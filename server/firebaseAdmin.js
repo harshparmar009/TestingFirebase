@@ -2,7 +2,7 @@ import admin from "firebase-admin";
 import { createRequire } from "module";
 
 if (!admin.apps.length) {
-  // ✅ Use JSON file locally, env variables in production
+  //  Use JSON file locally, env variables in production
   if (process.env.NODE_ENV === "production") {
     admin.initializeApp({
       credential: admin.credential.cert({

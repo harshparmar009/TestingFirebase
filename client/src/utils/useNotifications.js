@@ -71,7 +71,7 @@ export function useNotifications() {
         localStorage.setItem("fcmToken", fcmToken);
         setToken(fcmToken);
 
-        await fetch("http://localhost:5000/api/register-token", {
+        await fetch(`${import.meta.env.SERVER_URL}/api/register-token`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token: fcmToken }),
@@ -79,7 +79,7 @@ export function useNotifications() {
         console.log("New token registered with backend ");
       } else {
         //  Token unchanged but server may have restarted — always re-register
-        await fetch("http://localhost:5000/api/register-token", {
+        await fetch(`${import.meta.env.SERVER_URL}/api/register-token`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token: fcmToken }),
