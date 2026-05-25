@@ -8,29 +8,30 @@ import admin from "./firebaseAdmin.js";
 const app = express();
 const port = process.env.PORT || 5000;
 
+// ✅ Simple and clear
 const allowedOrigins = [
   "http://localhost:5173",
+  "testing-firebase-eight.vercel.app", // ✅ your stable Vercel URL
   process.env.CLIENT_URL,
 ].filter(Boolean);
 
+console.log("✅ Allowed origins:", allowedOrigins);
+
 const corsOptions = {
   origin: (origin, callback) => {
-    const isAllowed =
-      !origin ||
-      allowedOrigins.includes(origin) ||
-      /https:\/\/.*\.vercel\.app$/.test(origin); // ✅ allows any vercel.app domain
+    // ✅ Log every request so you can see what's being blocked
+    console.log("📥 Request from origin:", origin);
 
-    if (isAllowed) {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      console.log("❌ Blocked by CORS:", origin);
+      console.log("❌ Blocked:", origin);
       callback(new Error("Not allowed by CORS"));
     }
   },
   methods: ["GET", "POST"],
   credentials: true,
 };
-
 
 // ✅ cors MUST be first, before everything else
 app.use(cors(corsOptions));
