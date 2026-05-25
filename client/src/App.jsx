@@ -8,7 +8,7 @@ import MessageInput from "./components/MessageInput";
 import { useNotifications } from "./utils/useNotifications";
 
 
-const socket = io("http://localhost:5000");
+const socket = io(`${import.meta.env.VITE_SERVER_URL || "http://localhost:5000"}`);
 
 function App() {
   const { token, notification, Toaster } = useNotifications();
@@ -62,7 +62,7 @@ function App() {
 
     // ✅ FCM notification in background — doesn't block chat
     try {
-      await fetch("http://localhost:5000/api/send-message", {
+      await fetch(`${import.meta.env.VITE_SERVER_URL}/api/send-message`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
