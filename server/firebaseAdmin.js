@@ -11,12 +11,12 @@ if (!admin.apps.length) {
         privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
       }),
     });
-  } else {
-    const require = createRequire(import.meta.url);
-    const serviceAccount = require("./serviceAccountKey.json");
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-    });
+  // } else {
+  //   const require = createRequire(import.meta.url);
+  //   const serviceAccount = require("./serviceAccountKey.json");
+  //   admin.initializeApp({
+  //     credential: admin.credential.cert(serviceAccount),
+  //   });
   }
 }
 
