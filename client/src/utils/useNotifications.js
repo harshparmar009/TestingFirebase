@@ -3,7 +3,7 @@ import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import app from "../firebase";
 import { Toaster, toast } from "react-hot-toast";
 
-const VAPID_KEY = impport.meta.env.VAPID_KEY ;
+const VAPID_KEY = import.meta.env.VAPID_KEY ;
 
 const messaging = getMessaging(app);
 

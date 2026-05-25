@@ -4,13 +4,13 @@ importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-com
 
 // Same config as your React app
 firebase.initializeApp({
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+  apiKey: "AIzaSyCsxrOyF6zjip-H6OYdjQ3S-XrhTpr38I0",
+  authDomain: "fir-testing-7d11a.firebaseapp.com",
+  projectId: "fir-testing-7d11a",
+  storageBucket: "fir-testing-7d11a.firebasestorage.app",
+  messagingSenderId: "163370778917",
+  appId: "1:163370778917:web:1a40c946122e42bead5acc",
+  measurementId: "G-P2S7K9EYYS"
 });
 
 const messaging = firebase.messaging();

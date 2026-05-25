@@ -3,6 +3,7 @@ import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 import admin from "./firebaseAdmin.js";
+import "dotenv/config";
 
 const app = express();
 
@@ -11,7 +12,7 @@ app.use(express.json());
 
 const server = http.createServer(app);
 
-// ✅ Module-level state
+// Module-level state
 const tokenStore = new Map();       // token -> { registeredAt, browser }
 const tokenFailures = new Map();    // token -> failureCount
 const MAX_FAILURES = 3;
