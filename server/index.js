@@ -1,9 +1,9 @@
+import "dotenv/config";
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 import admin from "./firebaseAdmin.js";
-import "dotenv/config";
 
 const app = express();
 
